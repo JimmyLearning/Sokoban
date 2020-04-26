@@ -7,7 +7,9 @@ import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileReader;
 import java.io.IOException;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 /**
  * @author Jimmy
@@ -28,8 +30,26 @@ public class EnumCreator {
 
         File attributeTemplate = getFile(templateFile, "AttributeTemplate");
         String attrStr = readFile(attributeTemplate);
+        File gsTemplate = getFile(templateFile, "GetSetTemplate");
+        String gsStr = readFile(gsTemplate);
+        Map<String, String> attrMap = new HashMap<>();
+        attrMap.put("code", "String");
+        attrMap.put("memo", "String");
+        StringBuilder attrResultBuilder = new StringBuilder();
+        StringBuilder gsResultBuilder = new StringBuilder();
+        attrMap.forEach((k, v) -> {
+            String nameReplaced = StringUtils.replace(attrStr, "{name}", k);
+            String nameReplaced2 = StringUtils.replace(gsStr, "{name}", k);
+            String nameReplaced3 = StringUtils.replace(gsStr, "{Name}", StringUtils.in);
+            String typeReplaced = StringUtils.replace(nameReplaced, "{type}", v);
+            String typeReplaced2 = StringUtils.replace(nameReplaced3, "{type}", v);
+            attrResultBuilder.append(typeReplaced);
+            gsResultBuilder.append(typeReplaced2);
+        });
+        System.err.println(attrResultBuilder.toString());
+        System.err.println(gsResultBuilder.toString());
 
-        System.err.println(attrStr);
+
     }
 
     private static String readFile(File f) throws IOException {
