@@ -24,6 +24,16 @@ public class ClassCreator {
         build("class", fileName, ".java", attrMap);
     }
 
+    public static void enumBuild(String fileName) throws IOException {
+        Map<String, String> attrMap = new HashMap<>();
+        Properties properties = new Properties();
+        properties.load(new FileReader("template" + File.separator + "attribute.properties"));
+        properties.forEach((k, v) -> {
+            attrMap.put(k.toString(), v.toString());
+        });
+        build("enum", fileName, ".java", attrMap);
+    }
+
     public static void build(String clazz, String fileName, String suffix, Map<String, String> attrMap) throws IOException {
         System.out.println("==================Build Start ====================");
         long startTime = System.currentTimeMillis();
@@ -43,12 +53,15 @@ public class ClassCreator {
         StringBuilder attrResultBuilder = new StringBuilder();
         StringBuilder gsResultBuilder = new StringBuilder();
         attrMap.forEach((k, v) -> {
+            String annotateStr = StringUtils.split(v, ":")[1];
+            v = StringUtils.split(v, ":")[0];
             String nameReplaced = StringUtils.replace(attrStr, "{name}", k);
             String nameReplaced2 = StringUtils.replace(gsStr, "{name}", k);
             String nameReplaced3 = StringUtils.replace(nameReplaced2, "{Name}", StringUtils.capitalize(k));
             String typeReplaced = StringUtils.replace(nameReplaced, "{type}", v);
             String typeReplaced2 = StringUtils.replace(nameReplaced3, "{type}", v);
-            attrResultBuilder.append(typeReplaced);
+            String annotateReplaced = StringUtils.replace(typeReplaced, "{annotate}", annotateStr);
+            attrResultBuilder.append(annotateReplaced);
             gsResultBuilder.append(typeReplaced2);
         });
         attrResultBuilder.append(System.getProperty("line.separator"));
