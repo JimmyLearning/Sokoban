@@ -1,0 +1,13 @@
+    {File}(String code, String memo){
+        this.code = code;
+        this.memo = memo;
+    }
+
+    public static boolean validateCode(String code){
+        for({File} e : values()){
+            if(e.getCode().equals(code)){
+                return true;
+            }
+        }
+        return false;
+    }

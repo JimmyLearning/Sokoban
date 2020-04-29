@@ -14,27 +14,69 @@ import java.util.Properties;
  */
 public class ClassCreator {
 
-    public static void javaBuild(String fileName) throws IOException {
+    public static void buildJava(String fileName) throws IOException {
         Map<String, String> attrMap = new HashMap<>();
         Properties properties = new Properties();
-        properties.load(new FileReader("template" + File.separator + "attribute.properties"));
-        properties.forEach((k, v) -> {
-            attrMap.put(k.toString(), v.toString());
-        });
-        build("class", fileName, ".java", attrMap);
+        properties.load(new FileReader("template" + File.separator + "java.properties"));
+        properties.forEach((k, v) -> attrMap.put(k.toString(), v.toString()));
+        javaBuilder("class", fileName, ".java", attrMap);
     }
 
-    public static void enumBuild(String fileName) throws IOException {
+    public static void buildEnum(String fileName) throws IOException {
         Map<String, String> attrMap = new HashMap<>();
         Properties properties = new Properties();
-        properties.load(new FileReader("template" + File.separator + "attribute.properties"));
-        properties.forEach((k, v) -> {
-            attrMap.put(k.toString(), v.toString());
-        });
-        build("enum", fileName, ".java", attrMap);
+        properties.load(new FileReader("template" + File.separator + "enum.properties"));
+        properties.forEach((k, v) -> attrMap.put(k.toString(), v.toString()));
+        // TODO
+        enumBuilder("enum", fileName, ".java", attrMap);
     }
 
-    public static void build(String clazz, String fileName, String suffix, Map<String, String> attrMap) throws IOException {
+    public static void javaBuilder(String clazz, String fileName, String suffix, Map<String, String> attrMap) throws IOException {
+        System.out.println("==================Build Start ====================");
+        long startTime = System.currentTimeMillis();
+        File templateFile = getPath("template");
+        // File frame
+        File fileTemplate = getFile(templateFile, "FileTemplate");
+        String fileStr = readFile(fileTemplate);
+        String classReplacedStr = StringUtils.replace(fileStr, "{class}", clazz);
+        String fileReplacedStr = StringUtils.replace(classReplacedStr, "{file}", fileName);
+
+        // Attribute frame
+        File attributeTemplate = getFile(templateFile, "AttributeTemplate");
+        String attrStr = readFile(attributeTemplate);
+        // GetSet frame
+        File gsTemplate = getFile(templateFile, "GetSetTemplate");
+        String gsStr = readFile(gsTemplate);
+        StringBuilder attrResultBuilder = new StringBuilder();
+        StringBuilder gsResultBuilder = new StringBuilder();
+        attrMap.forEach((k, v) -> {
+            String annotateStr = StringUtils.split(v, ":")[1];
+            v = StringUtils.split(v, ":")[0];
+            String nameReplaced = StringUtils.replace(attrStr, "{name}", k);
+            String nameReplaced2 = StringUtils.replace(gsStr, "{name}", k);
+            String nameReplaced3 = StringUtils.replace(nameReplaced2, "{Name}", StringUtils.capitalize(k));
+            String typeReplaced = StringUtils.replace(nameReplaced, "{type}", v);
+            String typeReplaced2 = StringUtils.replace(nameReplaced3, "{type}", v);
+            String annotateReplaced = StringUtils.replace(typeReplaced, "{annotate}", annotateStr);
+            attrResultBuilder.append(annotateReplaced);
+            gsResultBuilder.append(typeReplaced2);
+        });
+        attrResultBuilder.append(System.getProperty("line.separator"));
+        attrResultBuilder.append(gsResultBuilder);
+
+        String resultStr = StringUtils.replace(fileReplacedStr, "{body}", attrResultBuilder.toString());
+
+        File resultPath = new File("template" + File.separator + "result" + File.separator + fileName + suffix);
+        if(!resultPath.getParentFile().exists()){
+            resultPath.getParentFile().mkdirs();
+        }
+        writeFile(resultPath, resultStr);
+        long endTime = System.currentTimeMillis();
+        System.out.println("==================Build Cost " + (endTime - startTime) + "ms ================");
+        System.out.println("==================Build Success===================");
+    }
+
+    public static void enumBuilder(String clazz, String fileName, String suffix, Map<String, String> attrMap) throws IOException {
         System.out.println("==================Build Start ====================");
         long startTime = System.currentTimeMillis();
         File templateFile = getPath("template");

@@ -9,7 +9,7 @@ import java.io.IOException;
 public class TestMain {
 
     public static void main(String[] args) throws IOException {
-        ClassCreator.javaBuild("MyTest3");
+        ClassCreator.buildEnum("MyTest3");
     }
 
 }
