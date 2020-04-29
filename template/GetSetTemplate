@@ -1,0 +1,7 @@
+    public {type} get{Name}() {
+        return {name};
+    }
+
+    public void set{Name}({type} {name}) {
+        this.{name} = {name};
+    }
