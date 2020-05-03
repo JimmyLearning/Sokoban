@@ -26,7 +26,11 @@ public class ClassCreator {
         Map<String, String> attrMap = new HashMap<>();
         Properties properties = new Properties();
         properties.load(new FileReader("template" + File.separator + "enum.properties"));
-        properties.forEach((k, v) -> attrMap.put(k.toString(), v.toString()));
+        properties.forEach((k, v) -> {
+            if (StringUtils.isNotBlank(k.toString()) && StringUtils.isNotBlank(v.toString())) {
+                attrMap.put(k.toString(), v.toString());
+            }
+        });
         // TODO
         enumBuilder("enum", fileName, ".java", attrMap);
     }
@@ -67,7 +71,7 @@ public class ClassCreator {
         String resultStr = StringUtils.replace(fileReplacedStr, "{body}", attrResultBuilder.toString());
 
         File resultPath = new File("template" + File.separator + "result" + File.separator + fileName + suffix);
-        if(!resultPath.getParentFile().exists()){
+        if (!resultPath.getParentFile().exists()) {
             resultPath.getParentFile().mkdirs();
         }
         writeFile(resultPath, resultStr);
@@ -95,7 +99,7 @@ public class ClassCreator {
         StringBuilder attrResultBuilder = new StringBuilder();
         StringBuilder gsResultBuilder = new StringBuilder();
         attrMap.forEach((k, v) -> {
-            String annotateStr = StringUtils.split(v, ":")[1];
+            String annotateStr = v.split(":")[1];
             v = StringUtils.split(v, ":")[0];
             String nameReplaced = StringUtils.replace(attrStr, "{name}", k);
             String nameReplaced2 = StringUtils.replace(gsStr, "{name}", k);
@@ -107,12 +111,23 @@ public class ClassCreator {
             gsResultBuilder.append(typeReplaced2);
         });
         attrResultBuilder.append(System.getProperty("line.separator"));
-        attrResultBuilder.append(gsResultBuilder);
+        if (StringUtils.isNotBlank(gsResultBuilder.toString())) {
+            StringBuilder enumBuilder = new StringBuilder();
+            attrMap.forEach((k, v) -> {
+//                String annotateStr = v.split(":")[1];
+//                v = StringUtils.split(v, ":")[0];
+//                String enumName = StringUtils.upperCase(v);
+//                enumBuilder.append(enumName).append(",");
+            });
+            attrResultBuilder.append(new StringBuilder("//TODO cons").append(System.getProperty("line.separator")).append(gsResultBuilder));
+        } else {
+            attrResultBuilder.append(gsResultBuilder);
+        }
 
         String resultStr = StringUtils.replace(fileReplacedStr, "{body}", attrResultBuilder.toString());
 
         File resultPath = new File("template" + File.separator + "result" + File.separator + fileName + suffix);
-        if(!resultPath.getParentFile().exists()){
+        if (!resultPath.getParentFile().exists()) {
             resultPath.getParentFile().mkdirs();
         }
         writeFile(resultPath, resultStr);
@@ -132,7 +147,7 @@ public class ClassCreator {
         BufferedReader br = new BufferedReader(new FileReader(f));
         StringBuilder sb = new StringBuilder();
         String line = br.readLine();
-        while(line != null){
+        while (line != null) {
             sb.append(line);
             sb.append(System.getProperty("line.separator"));
             line = br.readLine();
@@ -141,11 +156,11 @@ public class ClassCreator {
         return sb.toString();
     }
 
-    private static File getFile(File path, String fileName){
+    private static File getFile(File path, String fileName) {
         return new File(path.getAbsolutePath() + File.separator + fileName);
     }
 
-    private static File getPath(String path){
+    private static File getPath(String path) {
         return new File(new File("").getAbsolutePath() + File.separator + path);
     }
 }
